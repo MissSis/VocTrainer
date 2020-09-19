@@ -10,7 +10,9 @@ import java.util.Scanner;
 public class Main {
 	
 	public static void main(String[] args) throws FileNotFoundException {
-		File myObj = new File("D:\\voc englisch.txt");
+		String filePath = "";
+		
+		File myObj = new File(filePath);
 		Scanner myReader = new Scanner(myObj);
 		
 		List<String> vocs = new ArrayList<>();
