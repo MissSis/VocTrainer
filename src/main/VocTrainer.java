@@ -12,20 +12,33 @@ public class VocTrainer {
 	String filePath;
 	String selectedSection;
 	boolean stopAtSectionEnd = false;
+	boolean showVocsAtStart = false;
 
 	
 	public VocTrainer(String filePath, String selectedSection) {
 		this.filePath = filePath;
 		this.selectedSection = selectedSection;
 	}
+	
+	public VocTrainer(String filePath, String selectedSection, boolean showVocsAtStart) {
+		this.filePath = filePath;
+		this.selectedSection = selectedSection;
+		this.showVocsAtStart = showVocsAtStart;
+	}
 
 	public static void main(String[] args) throws FileNotFoundException {
 		VocTrainer vocTrainer;
 		
 		if(args.length == 1) {
+			if(args[0].equals("help")) {
+				help();
+				return;
+			}
 			vocTrainer = new VocTrainer(args[0], null);
 		}else if(args.length == 2) {
 			vocTrainer = new VocTrainer(args[0], args[1]);
+		}else if(args.length == 3 && args[2].equals("true")) {
+			vocTrainer = new VocTrainer(args[0], args[1], true);
 		}else {
 			throw new IllegalArgumentException();
 		}
@@ -69,25 +82,33 @@ public class VocTrainer {
 			}
 		}
 		
-		System.out.println(vocs);
+		if(vocs.isEmpty() || vocs.stream().allMatch(str -> str.equals(""))) {
+			myReader.close();
+			throw new IllegalArgumentException("The selected section had no vocabulary");
+		}else if(showVocsAtStart) {
+			System.out.println(vocs);
+		}
 		
 		Scanner in = new Scanner(System.in);
 		
 		int i = 0;
 		String voc = null;
-		List<Integer> usedIndizies = new ArrayList<>();
+		List<Integer> unusedIndizies = new ArrayList<>();
+		for(int j = 0; j < vocs.size(); j++) {
+			unusedIndizies.add(j);
+		}
 		
 		while((voc = in.nextLine()) != null) {
 			if(voc.isEmpty()) {
-				i = new Random().nextInt(vocs.size());
-				if(usedIndizies.size() == vocs.size()) {
-					usedIndizies.clear();
+				if(unusedIndizies.size() == 0) {
+					for(int j = 0; j < vocs.size(); j++) {
+						unusedIndizies.add(j);
+					}
 				}
-				while(usedIndizies.contains(i)) {
-					i = new Random().nextInt(vocs.size());
-				}
-				usedIndizies.add(i);
-				System.out.println(vocs.get(i));
+				i = new Random().nextInt(unusedIndizies.size());
+				
+				System.out.println(vocs.get(unusedIndizies.get(i)));
+				unusedIndizies.remove(i);
 			}else if(voc.equals("exit")) {
 				break;
 			}
@@ -95,6 +116,15 @@ public class VocTrainer {
 		}
 		
 		myReader.close();
+		in.close();
+	}
+	
+	public static void help() {
+		System.out.println("run with 1 arg: file path");
+		System.out.println("run with 2 arg: file path, section");
+		System.out.println("run with 3 arg: file path, section, show all vocs at the start (type 'true' if you want this)");
+		Scanner in = new Scanner(System.in);
+		in.hasNext();
 		in.close();
 	}
 	
